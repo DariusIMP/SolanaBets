@@ -8,7 +8,6 @@ pub struct BettingWindow {
     pub bets: Vec<Bet>,        // List of bets
     pub resolved: bool,        // Whether bets are resolved
     pub weather_result: i8,    // Final weather outcome: 1 (rain), 0 (no rain)
-    pub total_pool: u64,       // Total SOL in lamports
     pub rain_pool: u64,        // Total SOL bet on rain
     pub no_rain_pool: u64,     // Total SOL bet on no rain
 }

@@ -13,4 +13,8 @@ pub enum ErrorCode {
     AlreadyResolved,
     #[msg("No bets to resolve.")]
     NoBets,
+    #[msg("Betting window is not resolved yet.")]
+    NotResolved,
+    #[msg("There is no winning bet.")]
+    NoWinningBet,
 }
