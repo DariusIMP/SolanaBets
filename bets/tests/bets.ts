@@ -56,6 +56,7 @@ describe("Bets", () => {
 		await airdrop(provider, user2.publicKey, BET_AMOUNT);
 
 		bettingWindowPDA = await getBettingWindowPDA(program, weatherWindowId);
+		await airdrop(provider, bettingWindowPDA, BET_AMOUNT);
 	});
 
 	let bettingWindowPDA: web3.PublicKey;
@@ -88,7 +89,6 @@ describe("Bets", () => {
 			})
 			.rpc();
 
-		expect(1).to.equal(1);
 	});
 
 	it("User 1 places a <1 sol> bet on <20 degrees>", async () => {
