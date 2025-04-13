@@ -5,7 +5,7 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-bets = "Fem3suceFz9QkQBZ5eruZ9xnb9HMDyjuboUueXMaWLtt"
+bets = "o7z4kPREFtvycXkxJf1muZhU6DeWHNrx1TW1JK7yGkA"
 
 [registry]
 url = "https://api.apr.dev"

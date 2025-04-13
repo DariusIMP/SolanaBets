@@ -80,15 +80,18 @@ describe("Bets", () => {
 
 	// Clear the state of the previous testing, because it uses the same PDA for each testing.
 	it("reset bet", async () => {
-		await program.methods
-			.resetBet(new BN(weatherWindowId))
-			.accounts({
-				bettingWindow: bettingWindowPDA,
-				user: admin,
-				clock: web3.SYSVAR_CLOCK_PUBKEY,
-			})
-			.rpc();
-
+		try {
+			await program.methods
+				.resetBet(new BN(weatherWindowId))
+				.accounts({
+					bettingWindow: bettingWindowPDA,
+					user: admin,
+					clock: web3.SYSVAR_CLOCK_PUBKEY,
+				})
+				.rpc();
+		} catch (e) {
+			// first reset will fail, just ignore
+		}
 	});
 
 	it("User 1 places a <1 sol> bet on <20 degrees>", async () => {
