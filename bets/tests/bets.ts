@@ -16,6 +16,25 @@ async function getBettingWindowPDA(program: Program<Bets>, windowId: number) {
 	return bettingWindowPDA;
 }
 
+
+async function airdrop(provider: anchor.AnchorProvider, user: web3.PublicKey, amount: number) {
+	// Request an airdrop
+	const airdropSignature = await provider.connection.requestAirdrop(
+		user, amount
+	);
+
+	// Wait for confirmation
+	const latestBlockHash = await provider.connection.getLatestBlockhash();
+	await provider.connection.confirmTransaction({
+		blockhash: latestBlockHash.blockhash,
+		lastValidBlockHeight: latestBlockHash.lastValidBlockHeight,
+		signature: airdropSignature,
+	});
+
+	const bal = await provider.connection.getBalance(user);
+	console.log(`airdrop<${user}> : ${bal} lamports`);
+}
+
 describe("Bets", () => {
 	const provider = anchor.AnchorProvider.env();
 	anchor.setProvider(provider);
@@ -31,11 +50,12 @@ describe("Bets", () => {
 
 	const user1 = web3.Keypair.generate();
 	const user2 = web3.Keypair.generate();
-	const user3 = web3.Keypair.generate();
+
 	before(async () => {
-		await provider.connection.requestAirdrop(user1.publicKey, BET_AMOUNT);
-		await provider.connection.requestAirdrop(user2.publicKey, BET_AMOUNT);
-		await provider.connection.requestAirdrop(user3.publicKey, BET_AMOUNT);
+		await airdrop(provider, user1.publicKey, BET_AMOUNT);
+		await airdrop(provider, user2.publicKey, BET_AMOUNT);
+
+		bettingWindowPDA = await getBettingWindowPDA(program, weatherWindowId);
 	});
 
 	let bettingWindowPDA: web3.PublicKey;
@@ -57,10 +77,6 @@ describe("Bets", () => {
 		}
 	}
 
-	beforeEach(async () => {
-		bettingWindowPDA = await getBettingWindowPDA(program, weatherWindowId);
-	});
-
 	// Clear the state of the previous testing, because it uses the same PDA for each testing.
 	it("reset bet", async () => {
 		await program.methods
@@ -76,6 +92,7 @@ describe("Bets", () => {
 	});
 
 	it("User 1 places a <1 sol> bet on <20 degrees>", async () => {
+
 		const prediction = TEMPERATUER_20_DEGREES;
 
 		await program.methods
@@ -201,3 +218,4 @@ describe("Bets", () => {
 		expect(bettingWindow.resolved).to.be.false;
 	});
 });
+
