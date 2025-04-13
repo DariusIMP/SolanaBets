@@ -7,9 +7,8 @@ pub struct BettingWindow {
     pub end_slot: u64,         // Slot when betting resolves
     pub bets: Vec<Bet>,        // List of bets
     pub resolved: bool,        // Whether bets are resolved
-    pub weather_result: i8,    // Final weather outcome: 1 (rain), 0 (no rain)
-    pub rain_pool: u64,        // Total SOL bet on rain
-    pub no_rain_pool: u64,     // Total SOL bet on no rain
+    pub weather_result: i8,    // Final weather outcome (temperature)
+    pub pool: u64,        // Total SOL bet on temperature
 }
 
 #[account]
@@ -17,5 +16,5 @@ pub struct BettingWindow {
 pub struct Bet {
     pub user: Pubkey,          // Bettor's public key
     pub amount: u64,           // SOL amount bet in lamports
-    pub prediction: i8,        // 1 for rain, 0 for no rain
+    pub prediction: i8,        // temperature
 }

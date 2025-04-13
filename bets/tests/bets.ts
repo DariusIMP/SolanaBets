@@ -25,8 +25,7 @@ describe("Bets", () => {
 
 	const BET_AMOUNT = web3.LAMPORTS_PER_SOL;
 
-	const NoRain = 0;
-	const Rain = 1;
+	const TEMPERATUER_20_DEGREES = 20;
 
 	const admin = wallet.publicKey;
 
@@ -76,8 +75,8 @@ describe("Bets", () => {
 		expect(1).to.equal(1);
 	});
 
-	it("User 1 places a <1 sol> bet on <rain>", async () => {
-		const prediction = Rain;
+	it("User 1 places a <1 sol> bet on <20 degrees>", async () => {
+		const prediction = TEMPERATUER_20_DEGREES;
 
 		await program.methods
 			.placeBet(new BN(weatherWindowId), prediction, new BN(BET_AMOUNT))
@@ -95,13 +94,12 @@ describe("Bets", () => {
 		expect(bettingWindow.bets[0].user.toBase58()).to.equal(user1.publicKey.toBase58());
 		expect(bettingWindow.bets[0].amount.toNumber()).to.equal(BET_AMOUNT);
 		expect(bettingWindow.bets[0].prediction).to.equal(prediction);
-		expect(bettingWindow.rainPool.toNumber()).to.equal(BET_AMOUNT);
-		expect(bettingWindow.noRainPool.toNumber()).to.equal(0);
+		expect(bettingWindow.pool.toNumber()).to.equal(BET_AMOUNT);
 		expect(bettingWindow.resolved).to.be.false;
 	});
 
-	it("User 2 places a <1 sol> bet on <no rain>", async () => {
-		const prediction = NoRain;
+	it("User 2 places a <1 sol> bet on <25 degrees>", async () => {
+		const prediction = 25;
 
 		await program.methods
 			.placeBet(new BN(weatherWindowId), prediction, new BN(BET_AMOUNT))
@@ -120,18 +118,18 @@ describe("Bets", () => {
 		expect(bettingWindow.bets[1].user.toBase58()).to.equal(user2.publicKey.toBase58());
 		expect(bettingWindow.bets[1].amount.toNumber()).to.equal(BET_AMOUNT);
 		expect(bettingWindow.bets[1].prediction).to.equal(prediction);
-		expect(bettingWindow.rainPool.toNumber()).to.equal(BET_AMOUNT);
-		expect(bettingWindow.noRainPool.toNumber()).to.equal(BET_AMOUNT);
+		expect(bettingWindow.pool.toNumber()).to.equal(BET_AMOUNT * 2);
 		expect(bettingWindow.resolved).to.be.false;
 	});
 
-	it("Resolves bets and distribute rewards", async () => {
+	it("Resolves bets and distribute rewards, final temperature: 20 degrees.", async () => {
 
 		console.log("Wait 5 seconds for the betting to expire.")
+		console.log("")
 		await advanceSlots(12); // ~ 5 seconds
 
 		await program.methods
-			.resolveBet(new BN(weatherWindowId), Rain)
+			.resolveBet(new BN(weatherWindowId), TEMPERATUER_20_DEGREES)
 			.accounts({
 				bettingWindow: bettingWindowPDA,
 				user: admin,
@@ -152,6 +150,26 @@ describe("Bets", () => {
 			})
 			.signers([user1])
 			.rpc();
+	});
+	it("User 2 should fail to claim the payout", async () => {
+		try {
+			await program.methods
+				.claimPayout(new BN(weatherWindowId))
+				.accounts({
+					bettingWindow: bettingWindowPDA,
+					user: user2.publicKey,
+					systemProgram: web3.SystemProgram.programId,
+				})
+				.signers([user2])
+				.rpc();
+		} catch (e) {
+			console.log("User 2 claim fail: " + e);
+		}
+	});
+
+
+	it("Check balances", async () => {
+		console.log();
 
 		const balance1 = await provider.connection.getBalance(user1.publicKey);
 		console.log(`User 1 balance: ${balance1} SOL`);

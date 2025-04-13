@@ -86,8 +86,7 @@ pub fn place_bet(ctx: Context<PlaceBet>, window_id: u64, prediction: i8, amount:
     let user = &ctx.accounts.user;
     let clock = &ctx.accounts.clock;
 
-    // Validate prediction (1 for rain, 0 for no rain)
-    if prediction != 0 && prediction != 1 {
+    if prediction <= 0 {
         return Err(ErrorCode::InvalidPrediction.into());
     }
 
@@ -99,8 +98,7 @@ pub fn place_bet(ctx: Context<PlaceBet>, window_id: u64, prediction: i8, amount:
         betting_window.bets = Vec::new();
         betting_window.resolved = false;
         betting_window.weather_result = 0;
-        betting_window.rain_pool = 0;
-        betting_window.no_rain_pool = 0;
+        betting_window.pool = 0;
     }
 
     // Check if betting window is still open
@@ -126,30 +124,26 @@ pub fn place_bet(ctx: Context<PlaceBet>, window_id: u64, prediction: i8, amount:
     };
     betting_window.bets.push(bet);
 
-    if prediction == 1 {
-        betting_window.rain_pool += amount;
-    } else {
-        betting_window.no_rain_pool += amount;
-    }
+    betting_window.pool += amount;
 
     Ok(())
 }
 
-pub fn weather_degrees(ctx: Context<WeatherDegrees>, window_id: u64) -> Result<()> {
-    let betting_window = &mut ctx.accounts.betting_window;
-    let clock = &ctx.accounts.clock;
+// pub fn weather_degrees(ctx: Context<WeatherDegrees>, window_id: u64) -> Result<()> {
+//     let betting_window = &mut ctx.accounts.betting_window;
+//     let clock = &ctx.accounts.clock;
 
-    // Ensure betting window is closed
-    if clock.slot < betting_window.end_slot {
-        return Err(ErrorCode::BettingNotClosed.into());
-    }
+//     // Ensure betting window is closed
+//     if clock.slot < betting_window.end_slot {
+//         return Err(ErrorCode::BettingNotClosed.into());
+//     }
 
-    // Simulate weather outcome (in production, use an oracle)
-    let pseudo_random = (clock.slot % 2) as i8; // 0 (no rain) or 1 (rain)
-    betting_window.weather_result = pseudo_random;
+//     // Simulate weather outcome (in production, use an oracle)
+//     let pseudo_random = (clock.slot % 2) as i8; // 0 (no rain) or 1 (rain)
+//     betting_window.weather_result = pseudo_random;
 
-    Ok(())
-}
+//     Ok(())
+// }
 
 pub fn resolve_bet(ctx: Context<ResolveBet>, window_id: u64, result: i8) -> Result<()> {
     let betting_window = &mut ctx.accounts.betting_window;
@@ -167,14 +161,8 @@ pub fn claim_payout(ctx: Context<ClaimPayout>, window_id: u64) -> Result<()> {
     let betting_window = &mut ctx.accounts.betting_window;
     let user = &ctx.accounts.user;
 
-    let (winning_pool, _losing_pool) = if betting_window.weather_result == 1 {
-        (betting_window.rain_pool, betting_window.no_rain_pool)
-    } else {
-        (betting_window.no_rain_pool, betting_window.rain_pool)
-    };
-
-    if winning_pool == 0 {
-        return Err(ErrorCode::NoWinningBet.into());
+    if betting_window.pool == 0 {
+        return Err(ErrorCode::NoBet.into());
     }
 
     let mut user_bet = None;
@@ -185,7 +173,7 @@ pub fn claim_payout(ctx: Context<ClaimPayout>, window_id: u64) -> Result<()> {
         }
     }
 
-    let bet = user_bet.ok_or(ErrorCode::NoWinningBet)?;
+    let bet = user_bet.ok_or(ErrorCode::YouLost)?;
     let payout = bet.amount * 2;
 
     // Direct lamport transfer from betting_window to user
@@ -200,8 +188,7 @@ pub fn reset_bet(ctx: Context<ResetBet>, window_id: u64) -> Result<()> {
 
     // Clear bets and reset fields
     betting_window.bets = Vec::new();
-    betting_window.rain_pool = 0;
-    betting_window.no_rain_pool = 0;
+    betting_window.pool = 0;
     betting_window.resolved = false;
     betting_window.weather_result = 0;
     betting_window.start_slot = 0;

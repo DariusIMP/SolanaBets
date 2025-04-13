@@ -11,11 +11,10 @@ pub mod error;
 pub mod bets {
     use super::*;
 
-    /// Places a bet on "rain" (1) or "no rain" (0).
     pub fn place_bet(
         ctx: Context<PlaceBet>,
         window_id: u64,
-        prediction: i8, // 1 for rain, 0 for no rain
+        prediction: i8,  // temperature
         amount: u64,   // SOL amount in lamports
     ) -> Result<()> {
         instructions::place_bet(ctx, window_id, prediction, amount)

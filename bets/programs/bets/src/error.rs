@@ -5,7 +5,7 @@ use anchor_lang::prelude::*;
 pub enum ErrorCode {
     #[msg("Betting window is closed.")]
     BettingClosed,
-    #[msg("Invalid prediction. Use 1 for rain or 0 for no rain.")]
+    #[msg("Invalid prediction. Must > 0.")]
     InvalidPrediction,
     #[msg("Betting window is not closed yet.")]
     BettingNotClosed,
@@ -16,5 +16,7 @@ pub enum ErrorCode {
     #[msg("Betting window is not resolved yet.")]
     NotResolved,
     #[msg("There is no winning bet.")]
-    NoWinningBet,
+    NoBet,
+    #[msg("You lost.")]
+    YouLost,
 }
