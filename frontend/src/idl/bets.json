@@ -1,0 +1,403 @@
+{
+    "address": "9ZXoWhyzVVbLsR8REqgH763W8PWZ2r1RFvdVgDjFMWJF",
+    "name": "bets",
+    "version": "0.1.0",
+    "metadata": {
+      "name": "bets",
+      "version": "0.1.0",
+      "spec": "0.1.0",
+      "description": "Created with Anchor"
+    },
+    "instructions": [
+      {
+        "name": "claim_payout",
+        "docs": [
+          "User claim the payout"
+        ],
+        "discriminator": [
+          127,
+          240,
+          132,
+          62,
+          227,
+          198,
+          146,
+          133
+        ],
+        "accounts": [
+          {
+            "name": "betting_window",
+            "writable": true,
+            "pda": {
+              "seeds": [
+                {
+                  "kind": "const",
+                  "value": [
+                    98,
+                    101,
+                    116,
+                    116,
+                    105,
+                    110,
+                    103,
+                    95,
+                    119,
+                    105,
+                    110,
+                    100,
+                    111,
+                    119
+                  ]
+                },
+                {
+                  "kind": "arg",
+                  "path": "window_id"
+                }
+              ]
+            }
+          },
+          {
+            "name": "user",
+            "writable": true,
+            "signer": true
+          },
+          {
+            "name": "system_program",
+            "address": "11111111111111111111111111111111"
+          }
+        ],
+        "args": [
+          {
+            "name": "window_id",
+            "type": "u64"
+          }
+        ]
+      },
+      {
+        "name": "place_bet",
+        "discriminator": [
+          222,
+          62,
+          67,
+          220,
+          63,
+          166,
+          126,
+          33
+        ],
+        "accounts": [
+          {
+            "name": "betting_window",
+            "writable": true,
+            "pda": {
+              "seeds": [
+                {
+                  "kind": "const",
+                  "value": [
+                    98,
+                    101,
+                    116,
+                    116,
+                    105,
+                    110,
+                    103,
+                    95,
+                    119,
+                    105,
+                    110,
+                    100,
+                    111,
+                    119
+                  ]
+                },
+                {
+                  "kind": "arg",
+                  "path": "window_id"
+                }
+              ]
+            }
+          },
+          {
+            "name": "user",
+            "writable": true,
+            "signer": true
+          },
+          {
+            "name": "system_program",
+            "address": "11111111111111111111111111111111"
+          },
+          {
+            "name": "clock",
+            "address": "SysvarC1ock11111111111111111111111111111111"
+          }
+        ],
+        "args": [
+          {
+            "name": "window_id",
+            "type": "u64"
+          },
+          {
+            "name": "prediction",
+            "type": "i8"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      },
+      {
+        "name": "reset_bet",
+        "docs": [
+          "Resets the betting window to clear bets and prepare for a new round."
+        ],
+        "discriminator": [
+          167,
+          46,
+          187,
+          56,
+          183,
+          228,
+          65,
+          176
+        ],
+        "accounts": [
+          {
+            "name": "betting_window",
+            "writable": true,
+            "pda": {
+              "seeds": [
+                {
+                  "kind": "const",
+                  "value": [
+                    98,
+                    101,
+                    116,
+                    116,
+                    105,
+                    110,
+                    103,
+                    95,
+                    119,
+                    105,
+                    110,
+                    100,
+                    111,
+                    119
+                  ]
+                },
+                {
+                  "kind": "arg",
+                  "path": "window_id"
+                }
+              ]
+            }
+          },
+          {
+            "name": "user",
+            "writable": true,
+            "signer": true
+          },
+          {
+            "name": "clock",
+            "address": "SysvarC1ock11111111111111111111111111111111"
+          }
+        ],
+        "args": [
+          {
+            "name": "window_id",
+            "type": "u64"
+          }
+        ]
+      },
+      {
+        "name": "resolve_bet",
+        "docs": [
+          "Expire the betting window."
+        ],
+        "discriminator": [
+          137,
+          132,
+          33,
+          97,
+          48,
+          208,
+          30,
+          159
+        ],
+        "accounts": [
+          {
+            "name": "betting_window",
+            "writable": true,
+            "pda": {
+              "seeds": [
+                {
+                  "kind": "const",
+                  "value": [
+                    98,
+                    101,
+                    116,
+                    116,
+                    105,
+                    110,
+                    103,
+                    95,
+                    119,
+                    105,
+                    110,
+                    100,
+                    111,
+                    119
+                  ]
+                },
+                {
+                  "kind": "arg",
+                  "path": "window_id"
+                }
+              ]
+            }
+          },
+          {
+            "name": "user",
+            "writable": true,
+            "signer": true
+          },
+          {
+            "name": "system_program",
+            "address": "11111111111111111111111111111111"
+          },
+          {
+            "name": "clock",
+            "address": "SysvarC1ock11111111111111111111111111111111"
+          }
+        ],
+        "args": [
+          {
+            "name": "window_id",
+            "type": "u64"
+          },
+          {
+            "name": "result",
+            "type": "i8"
+          }
+        ]
+      }
+    ],
+    "accounts": [
+      {
+        "name": "BettingWindow",
+        "discriminator": [
+          118,
+          76,
+          122,
+          165,
+          0,
+          15,
+          157,
+          37
+        ]
+      }
+    ],
+    "errors": [
+      {
+        "code": 6000,
+        "name": "BettingClosed",
+        "msg": "Betting window is closed."
+      },
+      {
+        "code": 6001,
+        "name": "InvalidPrediction",
+        "msg": "Invalid prediction. Must > 0."
+      },
+      {
+        "code": 6002,
+        "name": "BettingNotClosed",
+        "msg": "Betting window is not closed yet."
+      },
+      {
+        "code": 6003,
+        "name": "AlreadyResolved",
+        "msg": "Betting window is already resolved."
+      },
+      {
+        "code": 6004,
+        "name": "NoBets",
+        "msg": "No bets to resolve."
+      },
+      {
+        "code": 6005,
+        "name": "NotResolved",
+        "msg": "Betting window is not resolved yet."
+      },
+      {
+        "code": 6006,
+        "name": "NoBet",
+        "msg": "There is no winning bet."
+      },
+      {
+        "code": 6007,
+        "name": "YouLost",
+        "msg": "You lost."
+      }
+    ],
+    "types": [
+      {
+        "name": "Bet",
+        "type": {
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "user",
+              "type": "pubkey"
+            },
+            {
+              "name": "amount",
+              "type": "u64"
+            },
+            {
+              "name": "prediction",
+              "type": "i8"
+            }
+          ]
+        }
+      },
+      {
+        "name": "BettingWindow",
+        "type": {
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "start_slot",
+              "type": "u64"
+            },
+            {
+              "name": "end_slot",
+              "type": "u64"
+            },
+            {
+              "name": "bets",
+              "type": {
+                "vec": {
+                  "defined": {
+                    "name": "Bet"
+                  }
+                }
+              }
+            },
+            {
+              "name": "resolved",
+              "type": "bool"
+            },
+            {
+              "name": "weather_result",
+              "type": "i8"
+            },
+            {
+              "name": "pool",
+              "type": "u64"
+            }
+          ]
+        }
+      }
+    ]
+  }
