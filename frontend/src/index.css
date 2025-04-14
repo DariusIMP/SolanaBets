@@ -1,13 +1,33 @@
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 :root {
     font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
     line-height: 1.5;
     font-weight: 400;
-  }
+}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+  outline: none;
+}
+
+/* Elimina las flechas en Firefox */
+input[type="number"] {
+  -moz-appearance: textfield;
+  outline: none;
+}
+
   
   body {
     margin: 0;
     display: flex;
-    place-items: center;
+    justify-content: center;
+    align-items: center;
     min-width: 320px;
     min-height: 100vh;
     background-color: #242424;
@@ -19,6 +39,9 @@
     margin: 0 auto;
     padding: 2rem;
     text-align: center;
+    background-color: #1a1a1a;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
   }
   
   .betting-form {
@@ -30,8 +53,16 @@
   }
   
   .betting-form div {
+    width: 100%;
+    height: 40px;
     display: flex;
-    gap: 1rem;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .button-container {
+    display: flex;
+    justify-content: space-around !important;
     align-items: center;
   }
   
@@ -55,6 +86,10 @@
     cursor: pointer;
     transition: border-color 0.25s;
   }
+  .status{
+    background-color: coral !important;
+    
+  }
   
   button:hover {
     border-color: #646cff;
@@ -66,3 +101,79 @@
     border-radius: 4px;
     background-color: #1a1a1a;
   }
+
+.windows-tabs {
+  display: flex;
+  gap: 10px;
+  margin: 20px 0;
+  flex-wrap: wrap;
+}
+
+.tab {
+  padding: 8px 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tab:hover {
+  background: #f0f0f0;
+}
+
+.tab.active {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.window-info {
+  margin-top: 20px;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content:start !important;
+  width: 100%;
+  height: fit-content !important;
+  
+
+}
+
+.info-grid {
+  display: flex;
+  flex-direction: column;
+  margin: 15px 0;
+  width: 100%;
+  height: fit-content;
+  min-height: 200px;
+}
+
+.bets-list {
+  margin-top: 15px;
+  height: fit-content;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.bet-item {
+  padding: 10px;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  width: 100%;
+  height: fit-content;
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+}
+
+.bet-item div {
+  margin: 5px 0;
+}
