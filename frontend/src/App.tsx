@@ -5,7 +5,7 @@ import bs58 from 'bs58';
 import idl from './idl/bets.json';
 
 // Override the program ID from the IDL with the correct one from Anchor.toml
-const programID = new PublicKey("9ZXoWhyzVVbLsR8REqgH763W8PWZ2r1RFvdVgDjFMWJF");
+const programID = new PublicKey(idl.address);
 
 const anchorIdl = {
     ...idl,
