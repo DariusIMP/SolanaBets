@@ -142,6 +142,11 @@ describe("Bets", () => {
 		expect(bettingWindow.resolved).to.be.false;
 	});
 
+	it("List all bets", async () => {
+		const bettingWindow = await program.account.bettingWindow.fetch(bettingWindowPDA);
+		console.log(bettingWindow.bets);
+	});
+
 	it("Resolves bets and distribute rewards, final temperature: 20 degrees.", async () => {
 
 		console.log("Wait 5 seconds for the betting to expire.")
