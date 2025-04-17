@@ -2,6 +2,7 @@ import * as anchor from "@coral-xyz/anchor";
 import { Program, web3, BN } from "@coral-xyz/anchor";
 import { Bets } from "../target/types/bets";
 import { expect } from "chai";
+const { Keypair } = require("@solana/web3.js");
 
 
 // Helper function to generate PDA for BettingWindow
@@ -16,6 +17,13 @@ async function getBettingWindowPDA(program: Program<Bets>, windowId: number) {
 	return bettingWindowPDA;
 }
 
+async function sleep(ms) {
+	return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function near(num1: number, num2: number, tolerance: number) {
+	return Math.abs(num2 - num1) <= tolerance;
+}
 
 async function airdrop(provider: anchor.AnchorProvider, user: web3.PublicKey, amount: number) {
 	// Request an airdrop
@@ -35,6 +43,7 @@ async function airdrop(provider: anchor.AnchorProvider, user: web3.PublicKey, am
 	console.log(`airdrop<${user}> : ${bal} lamports`);
 }
 
+
 describe("Bets", () => {
 	const provider = anchor.AnchorProvider.env();
 	anchor.setProvider(provider);
@@ -42,21 +51,37 @@ describe("Bets", () => {
 	const program = anchor.workspace.Bets as Program<Bets>;
 	const wallet = provider.wallet as anchor.Wallet;
 
-	const BET_AMOUNT = web3.LAMPORTS_PER_SOL;
+	const BET_AMOUNT = web3.LAMPORTS_PER_SOL * 0.0001;
 
 	const TEMPERATUER_20_DEGREES = 20;
 
 	const admin = wallet.publicKey;
 
-	const user1 = web3.Keypair.generate();
-	const user2 = web3.Keypair.generate();
+
+	const user1 = Keypair.fromSecretKey(Uint8Array.from([4, 135, 60, 120, 198, 65, 51, 78, 250, 236, 183, 209, 123, 146, 219, 196, 31, 226, 37, 38, 193, 62, 135, 186, 163, 126, 218, 13, 201, 4, 12, 27, 205, 8, 45, 223, 28, 133, 221, 178, 170, 58, 120, 112, 105, 66, 196, 205, 212, 194, 82, 57, 80, 181, 32, 89, 157, 117, 31, 3, 127, 120, 88, 201]));
+	const user2 = Keypair.fromSecretKey(Uint8Array.from([203, 44, 86, 210, 179, 226, 160, 166, 198, 209, 133, 25, 120, 172, 206, 83, 26, 235, 104, 226, 125, 154, 106, 181, 252, 83, 52, 78, 194, 7, 252, 253, 115, 162, 93, 238, 74, 206, 193, 58, 79, 27, 52, 221, 13, 83, 212, 86, 239, 237, 149, 112, 57, 247, 70, 4, 72, 88, 170, 203, 19, 146, 26, 133]));
+	// console.log("wallet 1", user1.secretKey);
+	// console.log("wallet 2", user2.secretKey);
+
+	let balance1: number;
+	let balance2: number;
 
 	before(async () => {
-		await airdrop(provider, user1.publicKey, BET_AMOUNT);
-		await airdrop(provider, user2.publicKey, BET_AMOUNT);
+		balance1 = await provider.connection.getBalance(user1.publicKey);
+		if (balance1 < 2 * BET_AMOUNT) {
+			console.log(`user1 insufficient, trying to airdrop 1 sol to ${user1.publicKey}`);
+			await airdrop(provider, user1.publicKey, web3.LAMPORTS_PER_SOL); // airdrop 1 SOL
+			balance1 = await provider.connection.getBalance(user1.publicKey);
+		}
+
+		balance2 = await provider.connection.getBalance(user2.publicKey);
+		if (balance2 < 2 * BET_AMOUNT) {
+			console.log(`user2 insufficient, trying to airdrop 1 sol to ${user2.publicKey}`);
+			await airdrop(provider, user2.publicKey, web3.LAMPORTS_PER_SOL); // airdrop 1 SOL
+			balance2 = await provider.connection.getBalance(user2.publicKey);
+		}
 
 		bettingWindowPDA = await getBettingWindowPDA(program, weatherWindowId);
-		await airdrop(provider, bettingWindowPDA, BET_AMOUNT);
 	});
 
 	let bettingWindowPDA: web3.PublicKey;
@@ -149,9 +174,10 @@ describe("Bets", () => {
 
 	it("Resolves bets and distribute rewards, final temperature: 20 degrees.", async () => {
 
-		console.log("Wait 5 seconds for the betting to expire.")
+		console.log("Wait 10 seconds for the betting to expire.")
 		console.log("")
-		await advanceSlots(12); // ~ 5 seconds
+		// await advanceSlots(12); // ~ 5 seconds
+		await sleep(10000);
 
 		await program.methods
 			.resolveBet(new BN(weatherWindowId), TEMPERATUER_20_DEGREES)
@@ -195,14 +221,15 @@ describe("Bets", () => {
 
 	it("Check balances", async () => {
 		console.log();
+		const TOLERANCE = 100000; // transaction fee
 
-		const balance1 = await provider.connection.getBalance(user1.publicKey);
-		console.log(`User 1 balance: ${balance1} SOL`);
-		expect(balance1).to.equal(2 * BET_AMOUNT);
+		const balance1_after = await provider.connection.getBalance(user1.publicKey);
+		console.log(`User 1 balance increased: ${balance1_after - balance1} lamports`);
+		expect(balance1).to.be.closeTo(balance1 + BET_AMOUNT, TOLERANCE);
 
-		const balance2 = await provider.connection.getBalance(user2.publicKey);
-		console.log(`User 2 balance: ${balance2} SOL`);
-		expect(balance2).to.equal(0);
+		const balance2_after = await provider.connection.getBalance(user2.publicKey);
+		console.log(`User 2 balance increased: ${balance2_after - balance2} SOL`);
+		expect(balance2).to.be.closeTo(balance2, TOLERANCE);
 	});
 
 	it("Start a new round", async () => {

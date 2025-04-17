@@ -94,7 +94,7 @@ pub fn place_bet(ctx: Context<PlaceBet>, window_id: u64, prediction: i8, amount:
     let current_slot = clock.slot;
     if betting_window.start_slot == 0 || betting_window.resolved {
         betting_window.start_slot = current_slot;
-        betting_window.end_slot = current_slot + 10; // 10 slots == 4 seconds, each slot is 400ms
+        betting_window.end_slot = current_slot + 25; // 25 slots == 10 seconds, each slot is 400ms
         betting_window.bets = Vec::new();
         betting_window.resolved = false;
         betting_window.weather_result = 0;
