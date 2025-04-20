@@ -10,7 +10,6 @@ interface Props {
 
 export const WalletProvider: FC<Props> = ({ children }) => {
   const endpoint = useMemo(() => 'https://api.devnet.solana.com', []);
-
   const wallets = useMemo(() => [
     new PhantomWalletAdapter(),
     new SolflareWalletAdapter(),

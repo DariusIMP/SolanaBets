@@ -66,6 +66,17 @@ const anchorIdl = {
           { name: "windowId", type: "u64" },
           { name: "result", type: "i8" }
         ]
+      },
+      {
+        name: "claimPayout",
+        accounts: [
+          { name: "bettingWindow", isMut: true, isSigner: false },
+          { name: "user", isMut: true, isSigner: true },
+          { name: "systemProgram", isMut: false, isSigner: false }
+        ],
+        args: [
+          { name: "windowId", type: "u64" }
+        ]
       }
     ]
 };
@@ -196,8 +207,10 @@ const App: FC = () => {
         programID
       );
 
+      // Obtener el último blockhash
       const latestBlockhash = await connection.getLatestBlockhash();
 
+      // Crear la transacción
       const tx = await program.methods
         .placeBet(new BN(windowId), prediction, new BN(amount * LAMPORTS_PER_SOL))
         .accounts({
@@ -208,15 +221,18 @@ const App: FC = () => {
         })
         .transaction();
 
+      // Establecer el recentBlockhash y feePayer
       tx.recentBlockhash = latestBlockhash.blockhash;
       tx.feePayer = publicKey;
 
       const signedTx = await signTransaction(tx);
       const signature = await connection.sendRawTransaction(signedTx.serialize());
-      await connection.confirmTransaction({
+      const confirmation = await connection.confirmTransaction({
         signature,
         ...latestBlockhash
       });
+
+      console.log('Confirmación:', confirmation);
 
       setStatus('Apuesta colocada exitosamente!');
       // Obtener información de la ventana después de la apuesta
@@ -261,7 +277,48 @@ const App: FC = () => {
       setStatus('Error al obtener estado de la ventana');
     }
   }
+  const getWindowInfo = async () => {
+    if (!publicKey) return;
+    
+    try {
+      const connection = new Connection('https://api.devnet.solana.com', 'confirmed');
+      const provider = new AnchorProvider(connection, wallet as any, {});
+      const program = new Program(anchorIdl as unknown as Idl, programID, provider);
 
+      const [bettingWindow] = PublicKey.findProgramAddressSync(
+        [Buffer.from('betting_window'), new BN(windowId).toArrayLike(Buffer, 'le', 8)],
+        programID
+      );
+
+      const account = await program.account.bettingWindow.fetch(bettingWindow);
+      console.log("Información de la ventana:");
+      console.log("- Pool total:", account.pool.toString());
+      console.log("- Resultado:", account.weatherResult);
+      console.log("- Resuelta:", account.resolved);
+      
+      // Encontrar tu apuesta
+      const yourBet = account.bets.find((bet: any) => 
+        bet.user.toString() === publicKey.toString()
+      );
+      
+      if (yourBet) {
+        console.log("Tu apuesta:");
+        console.log("- Cantidad:", yourBet.amount.toString());
+        console.log("- Predicción:", yourBet.prediction);
+        
+        // Verificar si ganaste
+        if (account.resolved && yourBet.prediction === account.weatherResult) {
+          console.log("¡GANASTE! Puedes reclamar tu pago.");
+        } else if (account.resolved) {
+          console.log("Perdiste. Tu predicción no coincide con el resultado.");
+        }
+      } else {
+        console.log("No tienes ninguna apuesta en esta ventana.");
+      }
+    } catch (error) {
+      console.error("Error obteniendo información:", error);
+    }
+  };
 
   return (
     <main className="container">
@@ -308,6 +365,7 @@ const App: FC = () => {
             <button onClick={resolveBet}>Resolve Bet</button>
             <button onClick={claimPayout}>Claim Payout</button>
             <button onClick={getWindowStatus}>Get Window Status</button>
+            <button onClick={getWindowInfo}>Get Window Info</button>
           </div>
           {status && <p className="status">{status}</p>}
           
