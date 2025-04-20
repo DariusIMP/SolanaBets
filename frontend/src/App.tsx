@@ -226,41 +226,7 @@ const App: FC = () => {
       setStatus('Error al colocar la apuesta. Revisa la consola para más detalles.');
     }
   };
-  
-  const getWindowStatus = async () => {
-    if(!publicKey || !signTransaction) {
-      setStatus('Wallet no conectada');
-      return;
-    }
-
-    setStatus('Obteniendo estado de la ventana...');
-    try {
-      const connection = new Connection('https://api.devnet.solana.com', 'confirmed');
-      const provider = new AnchorProvider(connection, wallet as any, {});
-      const program = new Program(anchorIdl as unknown as Idl, programID, provider);
-
-      const [bettingWindow] = PublicKey.findProgramAddressSync(
-        [Buffer.from('betting_window'), new BN(windowId).toArrayLike(Buffer, 'le', 8)],
-        programID
-      );
-
-      console.log('Buscando cuenta en:', bettingWindow.toString());
-      const bettingWindowAccount = await program.account.bettingWindow.fetch(bettingWindow);
-      console.log('Datos de la cuenta:', bettingWindowAccount);
-      
-      // Guardar la información de la ventana
-      setWindows(prev => ({
-        ...prev,
-        [windowId]: bettingWindowAccount
-      }));
-      
-      setActiveWindow(windowId);
-      setStatus(`Estado de la ventana: ${bettingWindowAccount.resolved ? 'Resuelta' : 'No Resuelta'}`);
-    } catch (error) {
-      console.error('Error al obtener estado de la ventana:', error);
-      setStatus('Error al obtener estado de la ventana');
-    }
-  }
+ 
 
   return (
     <main className="container">
