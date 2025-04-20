@@ -152,7 +152,7 @@ const App: FC = () => {
       const program = new Program(anchorIdl as unknown as Idl, programID, provider);
 
       const [bettingWindow] = PublicKey.findProgramAddressSync(
-        [Buffer.from('betting_window'), new BN(windowId).toArrayLike(Buffer, 'le', 8)],
+        [Buffer.from('betting_window'), new BN(windowIdAdmin).toArrayLike(Buffer, 'le', 8)],
         programID
       );
       
@@ -260,10 +260,10 @@ const App: FC = () => {
       // Guardar la información de la ventana
       setWindows(prev => ({
         ...prev,
-        [windowId]: bettingWindowAccount
+        [windowIdAdmin]: bettingWindowAccount
       }));
       
-      setActiveWindow(windowId);
+      setActiveWindow(windowIdAdmin);
       setStatus(`Estado de la ventana: ${bettingWindowAccount.resolved ? 'Resuelta' : 'No Resuelta'}`);
     } catch (error) {
       console.error('Error al obtener estado de la ventana:', error);

@@ -96,6 +96,11 @@ input[type="number"] {
       display: flex;
       text-align: center;
     }
+    button{
+      padding: 0px !important;
+      width: 75px;
+      height: 50px;
+    }
   }
   
   .betting-form {
@@ -154,32 +159,43 @@ input[type="number"] {
     padding: 1rem;
     border-radius: 4px;
     background-color: #1a1a1a;
+    position: absolute;
+    top: 0;
+    right: 5%;
   }
 
 .windows-tabs {
   display: flex;
+  justify-content: flex-start !important;
   gap: 10px;
   margin: 20px 0;
   flex-wrap: wrap;
+  overflow-x: auto;
 }
 
 .tab {
   padding: 8px 16px;
   border: 1px solid #ccc;
   border-radius: 4px;
-  background: white;
+  background: rgb(36, 35, 35);
   cursor: pointer;
   transition: all 0.3s ease;
+  
 }
 
 .tab:hover {
-  background: #f0f0f0;
+  background: #000000;
 }
 
 .tab.active {
   background: #007bff;
   color: white;
   border-color: #007bff;
+  
+}
+.tab.active:hover{
+  background: #000000;
+  color: white;
 }
 
 .window-info {
@@ -208,7 +224,7 @@ input[type="number"] {
 
 .bets-list {
   margin-top: 15px;
-  height: fit-content;
+  height: fit-content !important;
   width: 100%;
   display: flex;
   flex-direction: column;
