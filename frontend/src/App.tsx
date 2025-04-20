@@ -48,24 +48,43 @@ const anchorIdl = {
           { name: "prediction", type: "i8" },
           { name: "amount", type: "u64" }
         ]
+      },
+      {
+        name:"resolveBet",
+        accounts: [
+          { name: "bettingWindow", isMut: true, isSigner: false },
+          { name: "user", isMut: true, isSigner: true },
+          { name: "systemProgram", isMut: false, isSigner: false },
+          { name: "clock", isMut: false, isSigner: false }
+        ],
+        args: [
+          { name: "windowId", type: "u64" },
+          { name: "result", type: "i8" }
+        ]
       }
     ]
 };
 
 const App: FC = () => {
   const { wallet, publicKey, signTransaction } = useWallet();
-  const [prediction, setPrediction] = useState<number>();
-  const [amount, setAmount] = useState<number>(0.1);
-  const [windowId, setWindowId] = useState<number>(1);
+  const [prediction, setPrediction] = useState<number>(0);
+  const [amount, setAmount] = useState<number>(0);
+  const [windowId, setWindowId] = useState<number>(0);
   const [status, setStatus] = useState<string>('');
   const [windows, setWindows] = useState<{[key: number]: any}>({});
   const [activeWindow, setActiveWindow] = useState<number | null>(null);
+  const [result, setResult] = useState<number>(0);
 
   const placeBet = async () => {
     if (!publicKey || !signTransaction) return;
 
+    if (!amount) {
+      setStatus('Amount is required');
+      return;
+    }
+
     try {
-        const connection = new Connection('http://localhost:8899', 'confirmed');
+        const connection = new Connection('https://api.devnet.solana.com', 'confirmed');
         const provider = new AnchorProvider(connection, wallet as any, {});
         const program = new Program(anchorIdl as unknown as Idl, programID, provider);
   
@@ -106,15 +125,66 @@ const App: FC = () => {
         console.error('Error placing bet:', error);
         setStatus('Error al colocar la apuesta. Revisa la consola para más detalles.');
       }
+  }; 
+  
+  const resolveBet = async () => {
+    if (!publicKey || !signTransaction) return;
+
+    if (!result) {
+      setStatus('Result is required');
+      return;
+    }
+    try{
+      const connection = new Connection('https://api.devnet.solana.com', 'confirmed');
+      const provider = new AnchorProvider(connection, wallet as any, {});
+      const program = new Program(anchorIdl as unknown as Idl, programID, provider);
+
+      const [bettingWindow] = PublicKey.findProgramAddressSync(
+        [Buffer.from('betting_window'), new BN(windowId).toArrayLike(Buffer, 'le', 8)],
+        programID
+      );
+      
+      // Obtener el último blockhash
+      const latestBlockhash = await connection.getLatestBlockhash();
+
+      const tx = await program.methods
+        .resolveBet(new BN(windowId), result)
+        .accounts({
+          bettingWindow,
+          user: publicKey,
+          systemProgram: SystemProgram.programId,
+          clock: web3.SYSVAR_CLOCK_PUBKEY,
+        })
+        .transaction();
+        
+      // Establecer el recentBlockhash y feePayer
+      tx.recentBlockhash = latestBlockhash.blockhash;
+      tx.feePayer = publicKey;
+
+      const signedTx = await signTransaction(tx);
+      const signature = await connection.sendRawTransaction(signedTx.serialize());
+      await connection.confirmTransaction({
+        signature,
+        ...latestBlockhash
+      });
+      
+      setStatus('Apuesta resuelta exitosamente!');
+      // Actualizar el estado de la ventana después de resolver
+      await getWindowStatus();
+      
+    }catch(error){
+      console.error('Error resolving bet:', error);
+      setStatus('Error al resolver la apuesta. Revisa la consola para más detalles.');
+    }
   };
 
   const claimPayout = async () => {
     if (!publicKey || !signTransaction) return;
 
     try {
-      const connection = new Connection('http://127.0.0.1:8899', 'confirmed');
+      const connection = new Connection('https://api.devnet.solana.com', 'confirmed');
       const provider = new AnchorProvider(connection, wallet as any, {});
-      const program = new Program(idl as unknown as Idl, programID, provider);
+      const program = new Program(anchorIdl as unknown as Idl, programID, provider);
 
       const [bettingWindow] = PublicKey.findProgramAddressSync(
         [Buffer.from('betting_window'), new BN(windowId).toArrayLike(Buffer, 'le', 8)],
@@ -149,7 +219,7 @@ const App: FC = () => {
 
     setStatus('Obteniendo estado de la ventana...');
     try {
-      const connection = new Connection('http://127.0.0.1:8899', 'confirmed');
+      const connection = new Connection('https://api.devnet.solana.com', 'confirmed');
       const provider = new AnchorProvider(connection, wallet as any, {});
       const program = new Program(anchorIdl as unknown as Idl, programID, provider);
 
@@ -208,8 +278,17 @@ const App: FC = () => {
               step="0.1"
             />
           </div>
+          <div>
+            <label>Result:</label>
+            <input
+              type="number"
+              value={result}
+              onChange={(e) => setResult(Number(e.target.value))}
+            />
+          </div>
           <div className='button-container'>
             <button onClick={placeBet}>Place Bet</button>
+            <button onClick={resolveBet}>Resolve Bet</button>
             <button onClick={claimPayout}>Claim Payout</button>
             <button onClick={getWindowStatus}>Get Window Status</button>
           </div>
