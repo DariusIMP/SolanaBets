@@ -1,16 +1,11 @@
 import { FC, useState } from 'react';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { Connection, PublicKey, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { Program, AnchorProvider, web3, BN, Idl } from '@project-serum/anchor';
 import idl from './idl/bets.json';
-import { useWallet } from '@solana/wallet-adapter-react';
 
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
-
-// Override the program ID from the IDL with the correct one from Anchor.toml
 const programID = new PublicKey(idl.address);
-
-
-
 
 const anchorIdl = {
     ...idl,
@@ -212,12 +207,11 @@ const App: FC = () => {
 
       // Crear la transacción
       const tx = await program.methods
-        .placeBet(new BN(windowId), prediction, new BN(amount * LAMPORTS_PER_SOL))
+        .claimPayout(new BN(windowId))
         .accounts({
           bettingWindow,
           user: publicKey,
           systemProgram: SystemProgram.programId,
-          clock: web3.SYSVAR_CLOCK_PUBKEY,
         })
         .transaction();
 
@@ -234,15 +228,13 @@ const App: FC = () => {
 
       console.log('Confirmación:', confirmation);
 
-      setStatus('Apuesta colocada exitosamente!');
-      // Obtener información de la ventana después de la apuesta
-      await getWindowStatus();
+      setStatus('Payout claimed successfully!');
     } catch (error) {
-      console.error('Error placing bet:', error);
-      setStatus('Error al colocar la apuesta. Revisa la consola para más detalles.');
+      console.error('Error claiming payout:', error);
+      setStatus('Error claiming payout. Check console for details.');
     }
   };
-  
+
   const getWindowStatus = async () => {
     if(!publicKey || !signTransaction) {
       setStatus('Wallet no conectada');
@@ -277,6 +269,7 @@ const App: FC = () => {
       setStatus('Error al obtener estado de la ventana');
     }
   }
+
   const getWindowInfo = async () => {
     if (!publicKey) return;
     
