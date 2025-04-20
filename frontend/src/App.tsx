@@ -130,12 +130,12 @@ const App: FC = () => {
           ...latestBlockhash
         });
   
-        setStatus('Apuesta colocada exitosamente!');
-        // Obtener información de la ventana después de la apuesta
+        setStatus('Bet placed successfully!');
+        // Get window information after placing bet
         await getWindowStatus();
       } catch (error) {
         console.error('Error placing bet:', error);
-        setStatus('Error al colocar la apuesta. Revisa la consola para más detalles.');
+        setStatus('Error placing bet. Check console for details.');
       }
   }; 
   
@@ -156,7 +156,7 @@ const App: FC = () => {
         programID
       );
       
-      // Obtener el último blockhash
+      // Get latest blockhash
       const latestBlockhash = await connection.getLatestBlockhash();
 
       const tx = await program.methods
@@ -169,7 +169,7 @@ const App: FC = () => {
         })
         .transaction();
         
-      // Establecer el recentBlockhash y feePayer
+      // Set recentBlockhash and feePayer
       tx.recentBlockhash = latestBlockhash.blockhash;
       tx.feePayer = publicKey;
 
@@ -180,13 +180,13 @@ const App: FC = () => {
         ...latestBlockhash
       });
       
-      setStatus('Apuesta resuelta exitosamente!');
-      // Actualizar el estado de la ventana después de resolver
+      setStatus('Bet resolved successfully!');
+      // Update window status after resolving
       await getWindowStatus();
       
     }catch(error){
       console.error('Error resolving bet:', error);
-      setStatus('Error al resolver la apuesta. Revisa la consola para más detalles.');
+      setStatus('Error resolving bet. Check console for details.');
     }
   };
 
@@ -203,10 +203,10 @@ const App: FC = () => {
         programID
       );
 
-      // Obtener el último blockhash
+      // Get latest blockhash
       const latestBlockhash = await connection.getLatestBlockhash();
 
-      // Crear la transacción
+      // Create transaction
       const tx = await program.methods
         .claimPayout(new BN(windowId))
         .accounts({
@@ -216,7 +216,7 @@ const App: FC = () => {
         })
         .transaction();
 
-      // Establecer el recentBlockhash y feePayer
+      // Set recentBlockhash and feePayer
       tx.recentBlockhash = latestBlockhash.blockhash;
       tx.feePayer = publicKey;
 
@@ -227,7 +227,7 @@ const App: FC = () => {
         ...latestBlockhash
       });
 
-      console.log('Confirmación:', confirmation);
+      console.log('Confirmation:', confirmation);
 
       setStatus('Payout claimed successfully!');
     } catch (error) {
@@ -238,11 +238,11 @@ const App: FC = () => {
 
   const getWindowStatus = async () => {
     if(!publicKey || !signTransaction) {
-      setStatus('Wallet no conectada');
+      setStatus('Wallet not connected');
       return;
     }
 
-    setStatus('Obteniendo estado de la ventana...');
+    setStatus('Getting window status...');
     try {
       const connection = new Connection('https://api.devnet.solana.com', 'confirmed');
       const provider = new AnchorProvider(connection, wallet as any, {});
@@ -253,21 +253,21 @@ const App: FC = () => {
         programID
       );
 
-      console.log('Buscando cuenta en:', bettingWindow.toString());
+      console.log('Looking for account at:', bettingWindow.toString());
       const bettingWindowAccount = await program.account.bettingWindow.fetch(bettingWindow);
-      console.log('Datos de la cuenta:', bettingWindowAccount);
+      console.log('Account data:', bettingWindowAccount);
       
-      // Guardar la información de la ventana
+      // Save window information
       setWindows(prev => ({
         ...prev,
         [windowIdAdmin]: bettingWindowAccount
       }));
       
       setActiveWindow(windowIdAdmin);
-      setStatus(`Estado de la ventana: ${bettingWindowAccount.resolved ? 'Resuelta' : 'No Resuelta'}`);
+      setStatus(`Window status: ${bettingWindowAccount.resolved ? 'Resolved' : 'Not Resolved'}`);
     } catch (error) {
-      console.error('Error al obtener estado de la ventana:', error);
-      setStatus('Error al obtener estado de la ventana');
+      console.error('Error getting window status:', error);
+      setStatus('Error getting window status');
     }
   }
 
@@ -285,32 +285,32 @@ const App: FC = () => {
       );
 
       const account = await program.account.bettingWindow.fetch(bettingWindow);
-      console.log("Información de la ventana:");
-      console.log("- Pool total:", account.pool.toString());
-      console.log("- Resultado:", account.weatherResult);
-      console.log("- Resuelta:", account.resolved);
+      console.log("Window information:");
+      console.log("- Total pool:", account.pool.toString());
+      console.log("- Result:", account.weatherResult);
+      console.log("- Resolved:", account.resolved);
       
-      // Encontrar tu apuesta
+      // Find your bet
       const yourBet = account.bets.find((bet: any) => 
         bet.user.toString() === publicKey.toString()
       );
       
       if (yourBet) {
-        console.log("Tu apuesta:");
-        console.log("- Cantidad:", yourBet.amount.toString());
-        console.log("- Predicción:", yourBet.prediction);
+        console.log("Your bet:");
+        console.log("- Amount:", yourBet.amount.toString());
+        console.log("- Prediction:", yourBet.prediction);
         
-        // Verificar si ganaste
+        // Check if you won
         if (account.resolved && yourBet.prediction === account.weatherResult) {
-          console.log("¡GANASTE! Puedes reclamar tu pago.");
+          console.log("YOU WON! You can claim your payout.");
         } else if (account.resolved) {
-          console.log("Perdiste. Tu predicción no coincide con el resultado.");
+          console.log("You lost. Your prediction doesn't match the result.");
         }
       } else {
-        console.log("No tienes ninguna apuesta en esta ventana.");
+        console.log("You don't have any bets in this window.");
       }
     } catch (error) {
-      console.error("Error obteniendo información:", error);
+      console.error("Error getting information:", error);
     }
   };
 
@@ -396,7 +396,7 @@ const App: FC = () => {
           </div>
           {status && <p className="status">{status}</p>}
           
-          {/* Pestañas de ventanas */}
+          {/* Window tabs */}
           <div className="windows-tabs">
             {Object.keys(windows).map((windowId) => (
               <button
@@ -404,40 +404,40 @@ const App: FC = () => {
                 className={`tab ${activeWindow === Number(windowId) ? 'active' : ''}`}
                 onClick={() => setActiveWindow(Number(windowId))}
               >
-                Ventana {windowId}
+                Window {windowId}
               </button>
             ))}
           </div>
 
-          {/* Información de la ventana activa */}
+          {/* Active window information */}
           {activeWindow && windows[activeWindow] && (
             <section className="window-info">
-              <h3>Información de la Ventana {activeWindow}</h3>
+              <h3>Window Information {activeWindow}</h3>
               <div className="info-grid">
                 <div>
-                  <strong>Slot Inicial:</strong> {windows[activeWindow].startSlot.toString()}
+                  <strong>Start Slot:</strong> {windows[activeWindow].startSlot.toString()}
                 </div>
                 <div>
-                  <strong>Slot Final:</strong> {windows[activeWindow].endSlot.toString()}
+                  <strong>End Slot:</strong> {windows[activeWindow].endSlot.toString()}
                 </div>
                 <div>
-                  <strong>Resuelta:</strong> {windows[activeWindow].resolved ? 'Sí' : 'No'}
+                  <strong>Resolved:</strong> {windows[activeWindow].resolved ? 'Yes' : 'No'}
                 </div>
                 <div>
-                  <strong>Resultado del Clima:</strong> {windows[activeWindow].weatherResult}
+                  <strong>Weather Result:</strong> {windows[activeWindow].weatherResult}
                 </div>
                 <div>
                   <strong>Pool:</strong> {(Number(windows[activeWindow].pool) / LAMPORTS_PER_SOL).toFixed(2)} SOL
                 </div>
               </div>
               
-              <h4>Apuestas:</h4>
+              <h4>Bets:</h4>
               <div className="bets-list">
                 {windows[activeWindow].bets.map((bet: any, index: number) => (
                   <div key={index} className="bet-item">
-                    <div><strong>Usuario:</strong> {bet.user.toString()}</div>
-                    <div><strong>Cantidad:</strong> {(Number(bet.amount) / LAMPORTS_PER_SOL).toFixed(2)} SOL</div>
-                    <div><strong>Predicción:</strong> {bet.prediction}°C</div>
+                    <div><strong>User:</strong> {bet.user.toString()}</div>
+                    <div><strong>Amount:</strong> {(Number(bet.amount) / LAMPORTS_PER_SOL).toFixed(2)} SOL</div>
+                    <div><strong>Prediction:</strong> {bet.prediction}°C</div>
                   </div>
                 ))}
               </div>
