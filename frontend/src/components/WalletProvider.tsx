@@ -9,11 +9,8 @@ interface Props {
 }
 
 export const WalletProvider: FC<Props> = ({ children }) => {
-<<<<<<< HEAD
   const endpoint = useMemo(() => 'https://api.devnet.solana.com', []);
-=======
-  const endpoint = useMemo(() => 'http://127.0.0.1:8899', []);
->>>>>>> b1d2d9d ([ADD] window status)
+
   const wallets = useMemo(() => [
     new PhantomWalletAdapter(),
     new SolflareWalletAdapter(),
