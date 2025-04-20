@@ -85,6 +85,7 @@ const App: FC = () => {
   const [windows, setWindows] = useState<{[key: number]: any}>({});
   const [activeWindow, setActiveWindow] = useState<number | null>(null);
   const [result, setResult] = useState<number>(0);
+  const [windowIdAdmin, setWindowIdAdmin] = useState<number>(0);
 
   const placeBet = async () => {
     if (!publicKey || !signTransaction) return;
@@ -159,7 +160,7 @@ const App: FC = () => {
       const latestBlockhash = await connection.getLatestBlockhash();
 
       const tx = await program.methods
-        .resolveBet(new BN(windowId), result)
+        .resolveBet(new BN(windowIdAdmin), result)
         .accounts({
           bettingWindow,
           user: publicKey,
@@ -248,7 +249,7 @@ const App: FC = () => {
       const program = new Program(anchorIdl as unknown as Idl, programID, provider);
 
       const [bettingWindow] = PublicKey.findProgramAddressSync(
-        [Buffer.from('betting_window'), new BN(windowId).toArrayLike(Buffer, 'le', 8)],
+        [Buffer.from('betting_window'), new BN(windowIdAdmin).toArrayLike(Buffer, 'le', 8)],
         programID
       );
 
@@ -279,7 +280,7 @@ const App: FC = () => {
       const program = new Program(anchorIdl as unknown as Idl, programID, provider);
 
       const [bettingWindow] = PublicKey.findProgramAddressSync(
-        [Buffer.from('betting_window'), new BN(windowId).toArrayLike(Buffer, 'le', 8)],
+        [Buffer.from('betting_window'), new BN(windowIdAdmin).toArrayLike(Buffer, 'le', 8)],
         programID
       );
 
@@ -315,50 +316,83 @@ const App: FC = () => {
 
   return (
     <main className="container">
-      <h1>Solana Weather Betting</h1>
-      <WalletMultiButton />
+      <header className='header'>
+        <h1>Solana Weather Betting</h1>
+        <WalletMultiButton />
+      </header>
       
       {publicKey && (
         <section className="betting-form">
-          <div>
-            <label>Window ID:</label>
-            <input
-              type="number"
-              value={windowId}
-              onChange={(e) => setWindowId(Number(e.target.value))}
-            />
-          </div>
-          <div>
-            <label>Prediction (temperature):</label>
-            <input
-              type="number"
-              value={prediction}
-              onChange={(e) => setPrediction(Number(e.target.value))}
-            />
-          </div>
-          <div>
-            <label>Amount (SOL):</label>
-            <input
-              type="number"
-              value={amount}
-              onChange={(e) => setAmount(Number(e.target.value))}
-              step="0.1"
-            />
-          </div>
-          <div>
-            <label>Result:</label>
-            <input
-              type="number"
-              value={result}
-              onChange={(e) => setResult(Number(e.target.value))}
-            />
-          </div>
-          <div className='button-container'>
-            <button onClick={placeBet}>Place Bet</button>
-            <button onClick={resolveBet}>Resolve Bet</button>
-            <button onClick={claimPayout}>Claim Payout</button>
-            <button onClick={getWindowStatus}>Get Window Status</button>
-            <button onClick={getWindowInfo}>Get Window Info</button>
+          <div className='form-container'>
+            <div className='form-container-inputs'>
+              <div>
+                <label>Window ID:</label>
+                <input
+                  type="number"
+                  value={windowId}
+                  onChange={(e) => setWindowId(Number(e.target.value))}
+                />
+              </div>
+              <div>
+                <label>Temperature:</label>
+                <input
+                  type="number"
+                  value={prediction}
+                  onChange={(e) => setPrediction(Number(e.target.value))}
+                />
+              </div>
+              <div>
+                <label>Amount:</label>
+                <input
+                  type="number"
+                  value={amount}
+                  onChange={(e) => setAmount(Number(e.target.value))}
+                  step="0.1"
+                />
+              </div>
+              <div className='button-container'>
+                <button onClick={placeBet}>Place Bet</button>
+                {/* <button onClick={resolveBet}>Resolve Bet</button> */}
+                <button onClick={claimPayout}>Claim Payout</button>
+                {/* <button onClick={getWindowStatus}>Get Window Status</button>
+                <button onClick={getWindowInfo}>Get Window Info</button> */}
+              </div>
+            </div>
+            <div className='form-container-admin'>
+              <h2>Admin Panel</h2>
+              <div>
+                <label>Result:</label>
+                <input
+                  type="number"
+                  value={result}
+                  onChange={(e) => setResult(Number(e.target.value))}
+                />
+                
+              </div>
+              <div>
+                <label>ID:</label>
+                <input
+                  type="number"
+                  value={windowIdAdmin}
+                  onChange={(e) => setWindowIdAdmin(Number(e.target.value))}
+                />
+                
+              </div>
+              <div className='button-container'>
+                <button onClick={getWindowInfo}>Info</button>
+                <button onClick={getWindowStatus}>Status</button>
+                <button onClick={resolveBet}>Resolve</button>
+              </div>
+            </div>
+           {/*  <div>
+              <label>Result:</label>
+              <input
+                type="number"
+                value={result}
+                onChange={(e) => setResult(Number(e.target.value))}
+              />
+            </div> */}
+            
           </div>
           {status && <p className="status">{status}</p>}
           
@@ -377,7 +411,7 @@ const App: FC = () => {
 
           {/* Información de la ventana activa */}
           {activeWindow && windows[activeWindow] && (
-            <div className="window-info">
+            <section className="window-info">
               <h3>Información de la Ventana {activeWindow}</h3>
               <div className="info-grid">
                 <div>
@@ -407,7 +441,7 @@ const App: FC = () => {
                   </div>
                 ))}
               </div>
-            </div>
+            </section>
           )}
         </section>
       )}
