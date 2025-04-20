@@ -8,6 +8,7 @@
     font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
     line-height: 1.5;
     font-weight: 400;
+    z-index: 1;
 }
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
@@ -32,6 +33,8 @@ input[type="number"] {
     min-height: 100vh;
     background-color: #242424;
     color: rgba(255, 255, 255, 0.87);
+    position: relative;
+    z-index: 1;
   }
   
   .container {
@@ -42,6 +45,7 @@ input[type="number"] {
     background-color: #1a1a1a;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    position: relative;
   }
   .header{
     display: flex;
@@ -123,6 +127,11 @@ input[type="number"] {
     display: flex;
     justify-content: space-around !important;
     align-items: center;
+
+    button:hover{
+      background-color: #04073f;
+      color: white;
+    }
   }
   
   input {
@@ -160,17 +169,24 @@ input[type="number"] {
     border-radius: 4px;
     background-color: #1a1a1a;
     position: absolute;
-    top: 0;
-    right: 5%;
+    top: 1rem;
+    width: auto !important;
+    right: -50%;
   }
 
 .windows-tabs {
+  position: absolute;
+  top: 6rem;
+  left: -100px;
   display: flex;
+  flex-direction: column;
   justify-content: flex-start !important;
+  width: auto !important;
+  height: fit-content !important;
   gap: 10px;
-  margin: 20px 0;
   flex-wrap: wrap;
   overflow-x: auto;
+  z-index: -2;
 }
 
 .tab {
@@ -180,6 +196,7 @@ input[type="number"] {
   background: rgb(36, 35, 35);
   cursor: pointer;
   transition: all 0.3s ease;
+  width: 100%;
   
 }
 
